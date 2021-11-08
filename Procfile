@@ -1,1 +1,1 @@
-web: sh target/bin/qrvisor
+web: sh target/qrvisor
