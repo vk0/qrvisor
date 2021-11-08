@@ -4,7 +4,7 @@ import ru.dsci.qrvisor.bot.BotProcessor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class QrVisor {
+public class Main {
 
     public static void main(String[] args) {
         try {

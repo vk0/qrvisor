@@ -1,1 +1,1 @@
-web: sh target/qrvisor
+worker: java -cp target/classes/ ru.dsci.qrvisor.Main
