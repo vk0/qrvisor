@@ -84,7 +84,7 @@
                         <!-- If your application is packaged as a WAR file, then this configuration is sufficient, but if your
                              application is a standalone Java application then you’ll need to define a process -->
                         <processTypes>
-                            <web>java -cp target/classes:target/dependency/* ru.dsci.qrvisor.Main</web>
+                            <worker>java -cp target/classes:target/dependency/* ru.dsci.qrvisor.Main</worker>
                         </processTypes>
                         <!-- If your application is under version control with Git, then the plugin will detect the application
                              name by default. If you are not using Git, you must add this configuration to the plugin (but

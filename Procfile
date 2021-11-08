@@ -1,1 +1,1 @@
-web: java -cp target/classes:target/dependency/* ru.dsci.qrvisor.Main
+worker: java -cp target/classes:target/dependency/* ru.dsci.qrvisor.Main
