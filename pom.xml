@@ -77,11 +77,19 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <artifactId>maven-plugin-plugin</artifactId>
-                    <version>3.5</version>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>3.0.0</version>
                     <configuration>
-                        <encoding>UTF-8</encoding>
                     </configuration>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>shade</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>com.heroku.sdk</groupId>
