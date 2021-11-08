@@ -77,21 +77,6 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-shade-plugin</artifactId>
-                    <version>3.0.0</version>
-                    <configuration>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>shade</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
                     <groupId>com.heroku.sdk</groupId>
                     <artifactId>heroku-maven-plugin</artifactId>
                     <version>3.0.3</version>
@@ -99,7 +84,7 @@
                         <!-- If your application is packaged as a WAR file, then this configuration is sufficient, but if your
                              application is a standalone Java application then you’ll need to define a process -->
                         <processTypes>
-                            <web>java -cp target/classes/ ru.dsci.qrvisor.Main</web>
+                            <web>java -cp target/classes:target/dependency/* ru.dsci.qrvisor.Main</web>
                         </processTypes>
                         <!-- If your application is under version control with Git, then the plugin will detect the application
                              name by default. If you are not using Git, you must add this configuration to the plugin (but
