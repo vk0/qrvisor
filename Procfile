@@ -1,1 +1,1 @@
-web: sh target/bin/qrvisor
+web: sh target/qrvisor/qrvisor-1.0-SNAPSHOT.jar
