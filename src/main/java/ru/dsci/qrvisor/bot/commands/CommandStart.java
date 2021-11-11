@@ -8,15 +8,14 @@ public class CommandStart extends Command {
     @Override
     public void processMessage(AbsSender absSender, Message message, String[] strings) {
         message.setText("Добро пожаловать! \n"
-                + "Вас приветствует бот @QRVisor, у меня простая цель - верификация сертификатов вакцинации. \n"
-                + "Внимание! Все QR-коды проверяются на подделку. \n"
-                + "Для проверки сфотографируйте код и отправьте в чат. \n"
+                + "Вас приветствует бот @QRVisor, у меня простые функции: чтение и генерация QR-кодов. \n"
                 + "Начнём?"
         );
-        super.processMessage(absSender, message, strings);
+        super.processMessage(absSender, message, null);
     }
 
     public CommandStart() {
         super("start", "Запуск бота");
     }
+
 }

@@ -26,9 +26,6 @@ public class BotSettings {
     {
         try {
             properties = new Properties();
-//            ClassLoader cl = getClass().getClassLoader();
-//            URL url = cl.getResource("/");
-//            InputStream is = cl.getResourceAsStream(FILE_NAME);
             try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(FILE_NAME)) {
                 properties.load(inputStream);
             } catch (IOException e) {

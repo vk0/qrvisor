@@ -7,7 +7,9 @@ public class CommandHelp extends Command {
 
     @Override
     public void processMessage(AbsSender absSender, Message message, String[] strings) {
-        message.setText("Для проверки QR-кода сертификата вакцинации сфотографируйте код и отправьте в чат");
+        message.setText("Функции чат-бота: \n" +
+                "- считывание QR-кода: для считывания QR-кода сфотографируйте код и отправьте изображение в чат \n" +
+                "- генерация QR-кода: для генерации QR-кода отправьте текст или ссылку в чат");
         super.processMessage(absSender, message, strings);
     }
 
