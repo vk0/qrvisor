@@ -1,14 +1,13 @@
 package ru.dsci.qrvisor.bot;
 
 import com.google.zxing.WriterException;
+import org.json.JSONObject;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import ru.dsci.qrvisor.bot.commands.CommandHelp;
 import ru.dsci.qrvisor.bot.commands.CommandStart;
-import ru.dsci.qrvisor.core.IOTools;
 import ru.dsci.qrvisor.core.exceptions.UserException;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONObject;
 import org.telegram.telegrambots.extensions.bots.commandbot.TelegramLongPollingCommandBot;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
@@ -34,38 +33,6 @@ public class BotProcessor extends TelegramLongPollingCommandBot {
     private final TelegramBotsApi telegramBotsApi;
     private List<String> registeredCommands = new ArrayList<>();
 
-    public void sendMessage(Long chatId, String message) {
-        try {
-            SendMessage sendMessage = SendMessage
-                    .builder()
-                    .chatId(chatId.toString())
-                    .text(message).build();
-            execute(sendMessage);
-        } catch (TelegramApiException e) {
-            log.error(String.format("{sendMessage}: %s", e.getMessage()));
-        }
-    }
-
-    public void sendImage(Long chatId, String path) throws UserException {
-        try {
-            SendPhoto photo = new SendPhoto();
-            photo.setPhoto(new InputFile(new File(path)));
-            photo.setChatId(chatId.toString());
-            execute(photo);
-        } catch (TelegramApiException e) {
-            log.error(String.format("{SendImage: %s}", e.getMessage()));
-            throw new UserException("Ошибка отправки изображения");
-        }
-    }
-
-    public void sendQRImage(Long chatId, String path) throws UserException {
-        sendImage(chatId, path);
-        File file = new File(path);
-        if (!file.delete()) {
-            log.error(String.format("{sendQRImage} file '%s' removing error", path));
-        }
-    }
-
     private MessageType getMessageType(Update update) throws UserException {
         MessageType messageType = null;
         try {
@@ -79,8 +46,41 @@ public class BotProcessor extends TelegramLongPollingCommandBot {
                 throw new IllegalArgumentException(update.toString());
             return messageType;
         } catch (RuntimeException e) {
-            log.error(String.format("{getMessageType}: %s", e.getMessage()));
+            log.error(String.format("Invalid message type: %s", e.getMessage()));
             throw new UserException("Неподдерживаемый тип сообщения");
+        }
+    }
+
+    public void sendMessage(Long chatId, String message) {
+        try {
+            SendMessage sendMessage = SendMessage
+                    .builder()
+                    .chatId(chatId.toString())
+                    .text(message)
+                    .build();
+            execute(sendMessage);
+        } catch (TelegramApiException e) {
+            log.error(String.format("Sending message error: %s", e.getMessage()));
+        }
+    }
+
+    public void sendImage(Long chatId, String path) throws UserException {
+        try {
+            SendPhoto photo = new SendPhoto();
+            photo.setPhoto(new InputFile(new File(path)));
+            photo.setChatId(chatId.toString());
+            execute(photo);
+        } catch (TelegramApiException e) {
+            log.error(String.format("Sending image error: %s", e.getMessage()));
+            throw new UserException("Ошибка отправки изображения");
+        }
+    }
+
+    public void sendQRImage(Long chatId, String path) throws UserException {
+        sendImage(chatId, path);
+        File file = new File(path);
+        if (!file.delete()) {
+            log.error(String.format("File '%s' removing error", path));
         }
     }
 
@@ -92,23 +92,12 @@ public class BotProcessor extends TelegramLongPollingCommandBot {
                 true,
                 text);
         if (text.length() > TEXT_LIMIT) {
-            log.error("{processText} Message exceeds maximum length");
+            log.error(String.format("Message exceeds maximum length of %d", TEXT_LIMIT));
             throw new UserException(String.format("Сообщение превышает максимальную длину %d символов", TEXT_LIMIT));
         }
-        String imageUrl = QRTools.getQRFromText(text);
+        String imageUrl = QRTools.encodeText(text);
         logMessage(update.getMessage().getChatId(), update.getMessage().getFrom().getId(), false, "$image");
         sendQRImage(update.getMessage().getChatId(), imageUrl);
-    }
-
-    private String getFileUrl(String fileId) throws IOException {
-        String fileUrl = String.format("https://api.telegram.org/bot%s/getFile?file_id=%s",
-                botSettings.getToken(),
-                fileId);
-        JSONObject jsonObject = IOTools.readJsonFromUrl(fileUrl);
-        fileUrl = String.format("https://api.telegram.org/file/bot%s/%s",
-                botSettings.getToken(),
-                jsonObject.get("file_path"));
-        return fileUrl;
     }
 
     private void processImage(Update update) throws TelegramApiException, IOException, UserException {
@@ -118,6 +107,20 @@ public class BotProcessor extends TelegramLongPollingCommandBot {
         String text = QRTools.getTextFromQR(fileUrl);
         logMessage(update.getMessage().getChatId(), update.getMessage().getFrom().getId(), false, text);
         sendMessage(update.getMessage().getChatId(), text);
+    }
+
+    private JSONObject getFileRequest(String fileId) throws IOException {
+        String fileUrl = String.format("https://api.telegram.org/bot%s/getFile?file_id=%s",
+                botSettings.getToken(),
+                fileId);
+        return IOTools.readJsonFromUrl(fileUrl);
+    }
+
+    private String getFileUrl(String fileId) throws IOException {
+        JSONObject jsonObject = getFileRequest(fileId);
+        return String.format("https://api.telegram.org/file/bot%s/%s",
+                botSettings.getToken(),
+                jsonObject.get("file_path"));
     }
 
     @Override
@@ -183,6 +186,13 @@ public class BotProcessor extends TelegramLongPollingCommandBot {
                 .collect(Collectors.toList());
     }
 
+    private void registerCommands() {
+        registerCommands();
+        register(new CommandStart());
+        register(new CommandHelp());
+        setRegisteredCommands();
+    }
+
     public void registerBot() {
         try {
             telegramBotsApi.registerBot(this);
@@ -195,9 +205,7 @@ public class BotProcessor extends TelegramLongPollingCommandBot {
         try {
             telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
             registerBot();
-            register(new CommandStart());
-            register(new CommandHelp());
-            setRegisteredCommands();
+            registerCommands();
         } catch (TelegramApiException e) {
             throw new RuntimeException("Telegram Bot initialization error: " + e.getMessage());
         }

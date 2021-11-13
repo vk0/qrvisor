@@ -28,7 +28,7 @@ public class QRTools {
         return qrSizes.get(QRSIze);
     }
 
-    private static BinaryBitmap getBitmapFromSrcUrl(String url) throws IOException {
+    private static BinaryBitmap getBitmapFromUrl(String url) throws IOException {
         BinaryBitmap binaryBitmap;
         try {
             binaryBitmap = new BinaryBitmap(new HybridBinarizer(
@@ -50,7 +50,7 @@ public class QRTools {
         return result;
     }
 
-    public static String getQRFromText(String text, int width, int height)
+    public static String encodeText(String text, int width, int height)
             throws WriterException, IOException {
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
         Hashtable hashtable = new Hashtable();
@@ -61,21 +61,21 @@ public class QRTools {
         return path.toAbsolutePath().toString();
     }
 
-    public static String getQRFromText(String text, QRSIze QRSIze)
+    public static String encodeText(String text, QRSIze QRSIze)
             throws WriterException, IOException {
         int size = getQRSize(QRSIze);
-        return getQRFromText(text, size, size);
+        return encodeText(text, size, size);
     }
 
-    public static String getQRFromText(String text)
+    public static String encodeText(String text)
             throws WriterException, IOException {
-        return getQRFromText(text, DEFAULT_VERSION);
+        return encodeText(text, DEFAULT_VERSION);
     }
 
     public static String getTextFromQR(String url) throws IOException {
         Result result;
         try {
-            result = decodeBitmap(getBitmapFromSrcUrl(url));
+            result = decodeBitmap(getBitmapFromUrl(url));
         } catch (RuntimeException | MalformedURLException e) {
             log.debug(String.format("{decodeQR}: %s", e.getMessage()));
             throw new IOException(String.format("Unable to decrypt QR-code: %s", e.getMessage()));

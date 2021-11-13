@@ -1,4 +1,4 @@
-package ru.dsci.qrvisor.core;
+package ru.dsci.qrvisor.bot;
 
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONException;
